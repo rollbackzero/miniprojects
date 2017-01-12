@@ -1,0 +1,10 @@
+org :  edc
+hostname: edc01-bct
+inband_vlan : 2471
+nms_wlg_vlan :  2475
+nms_hlz_vlan : 2476
+rd : 15024
+network : 172.24.156
+interface: ge-1/1/2
+and02-lo : 172.24.33.1
+anx02-lo:  172.24.2.1
