@@ -13,21 +13,8 @@ if [ "$HEAD" != "$REMOTE" ] ; then
     exit 1
 fi
 
-# if [ -n "$LOCAL" ] ; then
-#    echo "* This code has uncommited changes, aborting!"
-#    exit 1
-# fi
-
-# get a copy of the config
-# echo "* Fetching the most recent config from the git server"
-# echo "* You may be prompted for a username/password, use the same one you use to access the wiki"
-# git clone --quite https://github.com/rollbackzero/miniprojects.git 
-# cd miniprojects
-
-
-# save the changes back to the git server
+#  save the changes back to the git server
     echo "* Pushing new config to the git server"
-    echo "* You may be prompted for a username/password, use the same one you use to access the wiki"
     git add .
     git commit -a -m "automatic update invoked by $WHOAMI"
     git push
