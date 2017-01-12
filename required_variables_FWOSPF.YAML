@@ -1,18 +1,3 @@
-This is for creating OSPF for new firewall services.
-This assumes the customer edge in managed by REANNZ and is on the MX and only caters to the current Frewall topology.
-This is to help reduce building new firewall services.
-
-topo.yaml is the current firewall topology
-
-Provide the input for building the primary/secondary inside VLANs and the other details in the yaml format as shown below.
-
-run python Firewall_OSPF.py <input yaml file>
-
-sample output provided.
-
-## Following is sample input file
-
-
 # Three letter acronym for company name
 tla :  gns
 

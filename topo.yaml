@@ -1,0 +1,22 @@
+#Current Topology of the REANNZ Firewall
+#Added by Yesh Ramesh yeshaswini.ramesh@reannz.co.nz on 21-Nov-2016
+anf14 :
+ router : and14
+ inborder : xe-0/0/8
+ outborder : xe-0/0/9
+ infw : 39
+ outfw : 40
+
+anf17 :
+ router : and17
+ inborder : xe-0/2/0
+ outborder : xe-0/2/1
+ infw : 39
+ outfw : 40
+
+anf16 :
+  router : and16
+  inborder : xe-0/2/7
+  outborder : xe-0/2/8
+  infw : 39
+  outfw : 40

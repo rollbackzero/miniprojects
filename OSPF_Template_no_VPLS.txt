@@ -1,0 +1,161 @@
+# Build primary path to {{ config[ 'anf' ] }}-avl {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}avl1 vdom
+
+{{ config[ 'cdevice' ] }}
+
+# Create {{ config[ 'tla' ] }}-{{ config[ 'des' ] }} routing instance
+
+set routing-instances {{ config[ 'tla' ] }}-{{ config[ 'des' ] }} instance-type virtual-router 
+set routing-instances {{ config[ 'tla' ] }}-{{ config[ 'des' ] }} description "{{ config[ 'tla' ] }} {{ config[ 'des' ] }}" 
+
+# Create VLAN {{ config[ 'vlan1' ] }} for the Primary link to Avalon Firewall {{ config[ 'anf' ] }}-avl
+	
+set interfaces {{ config[ 'cport' ] }} unit {{ config[ 'vlan1' ] }} vlan-id {{ config[ 'vlan1' ] }} description "{{ config[ 'des' ] }} Primary to {{ config[ 'anf' ] }}-avl" 
+set interfaces {{ config[ 'cport' ] }} unit {{ config[ 'vlan1' ] }} family inet address {{ config[ 'linknet0' ] }}/31 
+set routing-instances {{ config[ 'tla' ] }}-{{ config[ 'des' ] }} interface {{ config[ 'cport' ] }}.{{ config[ 'vlan1' ] }}
+
+
+{{ config[ 'and' ] }}
+
+# bridge {{ config[ 'vlan1' ] }} to {{ config[ 'anf' ] }}-avl
+
+set interfaces {{ config[ 'dport' ] }} unit {{ config[ 'vlan1' ] }} encapsulation vlan-bridge 
+set interfaces {{ config[ 'dport' ] }} unit {{ config[ 'vlan1' ] }} vlan-id {{ config[ 'vlan1' ] }} description "{{ config[ 'tla' ] }} {{ config[ 'des' ] }} primary to {{ config[ 'cdevice' ] }}” 
+set interfaces xe-0/2/0 unit {{ config[ 'vlan1' ] }} encapsulation vlan-bridge 
+set interfaces xe-0/2/0 unit {{ config[ 'vlan1' ] }} vlan-id {{ config[ 'vlan1' ] }} description "{{ config[ 'tla' ] }} {{ config[ 'des' ] }} primary to {{ config[ 'cdevice' ] }}” 
+
+set bridge-domain {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}-inside interface {{ config[ 'dport' ] }}.{{ config[ 'vlan1' ] }}
+set bridge-domain {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}-inside interface xe-0/2/0.{{ config[ 'vlan1' ] }}
+
+
+{{ config[ 'anf' ] }}
+
+# Configure port 39 to receive the primary path from {{ config[ 'cdevice' ] }} for {{ config[ 'des' ] }} 
+
+config vdom
+edit {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}avl1
+config system interface
+edit {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}.{{ config[ 'vlan1' ] }}
+set vdom {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}avl1
+set ip {{ config[ 'linknet1' ] }}/31
+set allowaccess ping
+set interface "port39"
+ set vlanid {{ config[ 'vlan1' ] }}
+
+# Add {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}.{{ config[ 'vlan1' ] }} to {{ config[ 'tla' ] }}-{{ config[ 'des' ] }} zone in FMG
+
+
+FMG
+
+# Add {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}.{{ config[ 'vlan1' ] }} to {{ config[ 'tla' ] }}-{{ config[ 'des' ] }} zone on FMG	
+REANNZ to test the {{ config[ 'cdevice' ] }} {{ config[ 'tla' ] }}-{{ config[ 'des' ] }} is reachable from {{ config[ 'anf' ] }}-avl and vice-versa on vlan {{ config[ 'vlan1' ] }}
+
+
+{{ config[ 'cdevice' ] }}
+
+ping {{ config[ 'linknet1' ] }} routing-instance {{ config[ 'tla' ] }}-{{ config[ 'des' ] }} 
+
+
+{{ config[ 'anf' ] }}-avl
+
+config vdom
+edit {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}avl1
+execute ping {{ config[ 'linknet0' ] }}
+
+
+{{ config[ 'anf' ] }}
+
+# Configure Port 40 for the Outside interface to {{ config[ 'tla' ] }}-edge routing-instance on {{ config[ 'cdevice' ] }} on VLAN 28 
+
+config vdom
+edit {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}avl1
+config system interface
+edit {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}.{{ config[ 'vlan2' ] }}
+set vdom {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}avl1
+set ip {{ config[ 'linknet2' ] }}/31
+set allowaccess ping
+set interface "port40"
+set vlanid {{ config[ 'vlan2' ] }}
+
+
+Fortigate Manager
+
+# Add {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}.{{ config[ 'vlan2' ] }} to {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}-external zone on FMG
+
+Configure {{ config[ 'and' ] }}-avl to bridge VLAN {{ config[ 'vlan2' ] }} and add it to {{ config[ 'tla' ] }}-edge for OSPF
+
+
+set interfaces xe-0/2/1 unit {{ config[ 'vlan2' ] }} vlan-id {{ config[ 'vlan2' ] }} description "{{ config[ 'tla' ] }} {{ config[ 'des' ] }} primary to {{ config[ 'tla' ] }}-edge” 
+set interfaces xe-0/2/1 unit {{ config[ 'vlan2' ] }} family inet address {{ config[ 'linknet3' ] }}/31
+set routing-instance {{ config[ 'tla' ] }}-edge interface xe-0/2/1.{{ config[ 'vlan2' ] }}
+set routing-instances {{ config[ 'tla' ] }}-edge protocols ospf area 0.0.0.0 interface xe-0/2/1.{{ config[ 'vlan2' ] }} metric {{ config[ 'metric' ] }}
+
+REANNZ to verify the reachability of {{ config[ 'anf' ] }}-avl {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}avl1 from {{ config[ 'tla' ] }}-edge and vice-versa
+
+
+{{ config[ 'and' ] }}-avl
+
+ping {{ config[ 'linknet2' ] }} routing-instance {{ config[ 'tla' ] }}-edge 
+
+
+{{ config[ 'anf' ] }}-avl
+
+config vdom
+edit {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}avl1
+execute ping {{ config[ 'linknet3' ] }}
+
+Configure OSPF on {{ config[ 'cdevice' ] }} {{ config[ 'tla' ] }}-{{ config[ 'des' ] }} routing-instance to reach the primary path to {{ config[ 'anf' ] }}-avl
+
+set routing-instances {{ config[ 'tla' ] }}-{{ config[ 'des' ] }} protocols ospf area 0.0.0.0 interface all disable
+set routing-instances {{ config[ 'tla' ] }}-{{ config[ 'des' ] }} protocols ospf area 0.0.0.0 interface {{ config[ 'cport' ] }}.{{ config[ 'vlan1' ] }} metric 50
+
+Add OSPF configuration on {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}avl1 
+
+config vdom
+edit {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}avl1
+config router ospf
+set router-id {{ config[ 'linknet2' ] }}
+ config area
+ 	 edit 0.0.0.0
+ 	 next
+  end
+config ospf-interface
+edit interface {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}.{{ config[ 'vlan2' ] }}
+set cost {{ config[ 'metric' ] }}
+next
+edit interface {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}.{{ config[ 'vlan1' ] }}
+set cost {{ config[ 'metric' ] }}
+next
+end
+config network
+ 		edit 1
+     	set prefix {{ config[ 'prefix' ] }} {{ config[ 'mask' ] }}
+   	 set area 0.0.0.0
+  	next
+ 		end
+ 
+REANNZ to check OSPF between {{ config[ 'anf' ] }}-avl and gnd01 on vlan {{ config[ 'vlan1' ] }}
+
+
+{{ config[ 'cdevice' ] }}
+
+show ospf neighbours instance {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}
+
+
+{{ config[ 'anf' ] }}-avl
+
+config vdom
+edit {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}avl1
+get router info routing-table  
+
+
+REANNZ to check OSPF between {{ config[ 'anf' ] }}-avl and {{ config[ 'and' ] }}-avl {{ config[ 'tla' ] }}-edge on vlan {{ config[ 'vlan2' ] }}
+
+{{ config[ 'anf' ] }}-avl
+
+show ospf neighbours instance {{ config[ 'tla' ] }}-edge
+
+{{ config[ 'anf' ] }}-avl
+
+config vdom
+edit {{ config[ 'tla' ] }}-{{ config[ 'des' ] }}avl1
+get router info routing-table 
