@@ -19,10 +19,10 @@ fi
 # fi
 
 # get a copy of the config
-echo "* Fetching the most recent config from the git server"
-echo "* You may be prompted for a username/password, use the same one you use to access the wiki"
-git clone --quite https://github.com/rollbackzero/miniprojects.git 
-cd miniprojects
+# echo "* Fetching the most recent config from the git server"
+# echo "* You may be prompted for a username/password, use the same one you use to access the wiki"
+# git clone --quite https://github.com/rollbackzero/miniprojects.git 
+# cd miniprojects
 
 
 # save the changes back to the git server
