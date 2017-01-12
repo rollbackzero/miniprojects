@@ -32,7 +32,6 @@ cd miniprojects
     git commit -a -m "automatic update invoked by $WHOAMI"
     git push
     sleep 5
-fi
 
 # git init
 # git add .
